@@ -6,15 +6,16 @@ from PIL import Image
 
 class ImageRenderer():
 
-    def __init__(self, width, height, color_command, frames=1, save_file_as="image", save_file_to="") -> None:
+    def __init__(self, width, height, color_command, save_file_as="image", save_file_to="", frames=1, frames_per_second=30) -> None:
         self.width = width
         self.height = height
         self.color_command = color_command
-        self.frames = frames
         self.save_file_as = save_file_as
         self.save_file_to = save_file_to
+        self.frames = frames
+        self.frames_per_second = frames_per_second
     
-        self.bar = progressbar.ProgressBar(max_value=(frames if frames <= 1 else height), widgets=[
+        self.bar = progressbar.ProgressBar(max_value=(frames if frames > 1 else height), widgets=[
                 ' [',
                 progressbar.Timer(format= 'elapsed time: %(elapsed)s'),
                 '] ',
@@ -27,14 +28,14 @@ class ImageRenderer():
     def generate(self):
         for frame in range(self.frames):
             if self.frames > 1:
-                self.bar.update(frame/self.frames)
+                self.bar.update(frame)
             
             current_image = Image.new(mode="RGB", size=(self.width, self.height), color="black") 
             current_map = current_image.load()
             
             for y in range(self.height):
                 if self.frames <= 1:
-                    self.bar.update(y/self.height)
+                    self.bar.update(self.height)
                 for x in range(self.width):
                     color = self.color_command(x, y, frame)
                     current_map[x, y] = (int(255*color[0]), int(255*color[1]), int(255*color[2]))
@@ -42,10 +43,9 @@ class ImageRenderer():
             self.images.append(current_image)
     
         if self.frames > 1:
-            self.images[0].save(self.save_file_to+self.save_file_as+".gif", save_all=True, append_images=self.images[1:], optimize=False, duration=10,loop=0)
+            self.images[0].save(self.save_file_to+self.save_file_as+".gif", save_all=True, append_images=self.images[1:], optimize=False, duration=1000/self.frames_per_second,loop=0)
         else:
             self.images[0].save(self.save_file_to+self.save_file_as+".png")
-
 
 
 class PixelRenderer():
@@ -127,9 +127,8 @@ def get_time():
 
 
 def start():
-
     # renderer = PixelRenderer(window, grid_size, grid_size, color_test, pixel_size=512//grid_size)
-    renderer = ImageRenderer(grid_size, grid_size, color_test, frames=32, save_file_as='checkered', save_file_to='gif_outputs/')
+    renderer = ImageRenderer(grid_size, grid_size, color_test, save_file_as='checkered', save_file_to='gif_outputs/', frames=32, frames_per_second=15)
 
     # print("start")
     # start_time = time.time()
@@ -145,8 +144,10 @@ def start():
 #     check_events()
     # pygame.display.update()
 
-grid_size = 256
-start()
+if __name__ == '__main__':
+    grid_size = 256
+    start()
+
 
 # def check_events():
 #     global run
