@@ -10,7 +10,7 @@ size = width*height
 
 # get compute shader code
 compute_shader_source = ""
-with open('compute_shader_test.glsl', 'r') as file:
+with open('compute_shader_main.glsl', 'r') as file:
     compute_shader_source = file.read()
 
 # create content
@@ -29,7 +29,8 @@ output_buffer_b.bind_to_storage_buffer(2)
 # create the compute shader
 compute_shader = context.compute_shader(compute_shader_source)
 # set the uniform values
-compute_shader['val'] = 0.8
+compute_shader['width'] = width
+compute_shader['height'] = height
 
 # run the shader
 group_x = size // 256
@@ -49,5 +50,5 @@ rgb_image_array = rgb_image_array.astype(numpy.uint8)
 # create image
 image = Image.fromarray(rgb_image_array, "RGB")
 # save image
-image.save("compute_shader_test_output.png")
+image.save("compute_shader_main_output.png")
  
