@@ -4,8 +4,8 @@ from PIL import Image
 
 
 # set dementions of picture
-width = 32
-height = 32
+width = 256
+height = 192
 size = width*height
 
 # get compute shader code
