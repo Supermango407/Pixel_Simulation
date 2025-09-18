@@ -27,9 +27,13 @@ void main() {
     // coordanates of the pixel from -1 to 1
     vec2 coords = (dec_uv-0.5)*2;
 
-    float dist = length(coords);
+    float val = length(coords);
+    val = sin(val*8.)/8.;
+    val = abs(val);
+    val = 0.02/val;
 
-    dataOutR[index] = abs(dist);
-    dataOutG[index] = abs(dist);
-    dataOutB[index] = abs(dist);
+    val = min(max(val, 0), 1);
+    dataOutR[index] = val;
+    dataOutG[index] = val;
+    dataOutB[index] = val;
 }
