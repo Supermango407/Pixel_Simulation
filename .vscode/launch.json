@@ -8,7 +8,7 @@
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/pygame_renderer.py",
+            "program": "${workspaceFolder}/compute_shader_main.py",
             "console": "integratedTerminal"
         }
     ]

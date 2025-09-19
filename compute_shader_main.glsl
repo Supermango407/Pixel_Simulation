@@ -1,33 +1,20 @@
 #version 430
 
-// The local_size_x directive specifies the number of work items in a local work group.
-layout(local_size_x = 256) in;
+// Set local workgroup size. The total number of workgroups will be calculated
+// from the image size and these values.
+layout (local_size_x = 4, local_size_y = 4, local_size_z = 1) in;
 
-layout(std430, binding = 0) buffer OutputBufferA {
-    float dataOutR[];
-};
-
-layout(std430, binding = 1) buffer OutputBufferB {
-    float dataOutG[];
-};
-
-layout(std430, binding = 2) buffer OutputBufferC {
-    float dataOutB[];
-};
-
-uniform int width;
-uniform int height;
+// `layout (binding = 0)` corresponds to `unit=0` in `texture.bind_to_image()`
+layout (binding = 0, rgba32f) writeonly uniform image2D OutputImage;
+layout (binding = 1, r32f) readonly uniform image2D InputImage;
 
 void main() {
-    uint index = gl_GlobalInvocationID.x;
-    // coordanates of the pixel
-    vec2 uv = vec2(float(index % width), float(height-floor(index / width)));
-    // coordanates of the pixel from 0 to 1
-    vec2 dec_uv = uv/vec2(width, height);
-    // coordanates of the pixel from -1 to 1
-    vec2 coords = (dec_uv-0.5)*2;
-    
-    dataOutR[index] = max(coords.x, 0.0);
-    dataOutG[index] = max(coords.y, 0.0);
-    dataOutB[index] = 0;
+    // `gl_GlobalInvocationID` gives the unique ID of the current thread (pixel)
+    ivec2 global_id = ivec2(gl_GlobalInvocationID.xy);
+
+    // Read the value from the input image
+    float pixel_value = imageLoad(InputImage, global_id).r;
+
+    // Write the result to the output image
+    imageStore(OutputImage, global_id, vec4(pixel_value, 0.0, 0.0, 1.0));
 }

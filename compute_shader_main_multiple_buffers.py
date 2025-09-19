@@ -4,13 +4,13 @@ from PIL import Image
 
 
 # set dementions of picture
-width = 1024
-height = 1024
+width = 128
+height = 96
 size = width*height
 
 # get compute shader code
 compute_shader_source = ""
-with open('compute_shader.glsl', 'r') as file:
+with open('compute_shader_main.glsl', 'r') as file:
     compute_shader_source = file.read()
 
 # create content
@@ -40,6 +40,7 @@ compute_shader.run(group_x)
 result_data_r = numpy.frombuffer(output_buffer_r.read(), dtype=numpy.float32)
 result_data_g = numpy.frombuffer(output_buffer_g.read(), dtype=numpy.float32)
 result_data_b = numpy.frombuffer(output_buffer_b.read(), dtype=numpy.float32)
+
 # formate data
 result_data_r = (result_data_r*255).astype(numpy.uint8).reshape(height, width)
 result_data_g = (result_data_g*255).astype(numpy.uint8).reshape(height, width)
@@ -50,5 +51,5 @@ rgb_image_array = rgb_image_array.astype(numpy.uint8)
 # create image
 image = Image.fromarray(rgb_image_array, "RGB")
 # save image
-image.save("compute_shader_output.png")
+image.save("compute_shader_main_output.png")
  
