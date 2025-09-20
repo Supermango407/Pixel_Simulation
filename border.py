@@ -19,7 +19,7 @@ points_data = numpy.array([[
     [0.4, 0.5]
 ]], dtype='f4') # 'f4' is for 32-bit float
 
-width, height = 256, 256
+width, height = 1024, 1024
 
 # 1. Initialize ModernGL context
 # This example uses a headless context. For a windowed app,
@@ -62,6 +62,7 @@ compute_shader.run(group_x=group_x, group_y=group_y)
 
 # 7. Read the output texture data back to a numpy array
 output_data = numpy.frombuffer(output_texture.read(), dtype='f4').reshape(height, width, 4)
+print(output_data[0][0])
 output_data = numpy.delete(output_data, 3, axis=2)
 output_data = numpy.flip(output_data, axis=0)
 
@@ -72,7 +73,7 @@ output_data = numpy.flip(output_data, axis=0)
 # print(output_data)
 
 rgb_image_array = (output_data*255).astype(numpy.uint8)
-print(rgb_image_array)
+# print(rgb_image_array)
 
 # create image
 image = Image.fromarray(rgb_image_array, "RGB")
