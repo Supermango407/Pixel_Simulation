@@ -1,6 +1,18 @@
 import moderngl
 import numpy
 from PIL import Image
+import math
+
+def get_clostest_dist(points:numpy.array) -> float:
+    nearest = math.inf
+    for i, point1 in enumerate(points):
+        for j, point2 in enumerate(points):
+            if j == i:
+                continue
+            dist = numpy.linalg.norm(point1-point2)
+            if dist < nearest:
+                nearest = dist
+    return nearest
 
 # get compute shader code
 compute_shader_source = ""
@@ -8,15 +20,24 @@ with open('border_shader.glsl', 'r') as file:
     compute_shader_source = file.read()
 
 
-point_number = 16
-width, height = 1024, 1024
+point_number = 32
+width, height = 512, 512
 frames_per_second = 30
 total_seconds = 5
 
 total_frames = frames_per_second*total_seconds
 
-rng = numpy.random.default_rng(2)
-# Example input: a simple 4x4 array
+# seed = 0
+# farthest_dist = 0
+# for i in range(100):
+#     rng = numpy.random.default_rng(i)
+#     points_data = rng.random((1, point_number, 3))
+#     dist = get_clostest_dist(points_data[0])
+#     if dist > farthest_dist:
+#         farthest_dist = dist
+#         seed = i
+
+rng = numpy.random.default_rng(90)
 points_data = rng.random((1, point_number, 3))
 points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 1))), axis=2)
 # points_data = numpy.array([[
@@ -78,7 +99,8 @@ for i in range(total_frames):
 
     # 7. Read the output texture data back to a numpy array
     output_data = numpy.frombuffer(output_texture.read(), dtype='f4').reshape(height, width, 4)
-    # print(output_data[8][0])
+    print(output_data[8][0])
+    print()
     output_data = numpy.delete(output_data, 3, axis=2)
     output_data = numpy.flip(output_data, axis=0)
 

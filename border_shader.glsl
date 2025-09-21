@@ -87,6 +87,55 @@ void get_two_nearsest_points(vec3 pos, inout vec4 point1, inout vec4 point2) {
     }
 }
 
+void get_three_nearsest_points(vec3 pos, inout vec4 point1, inout vec4 point2, inout vec4 point3) {
+    // first two values for position 3rd value for distance
+    // set two be the first two points by default.
+    point1 = vec4(get_point_number(0).xyz, 0.0);
+    point2 = vec4(get_point_number(1).xyz, 0.0);
+    point3 = vec4(get_point_number(2).xyz, 0.0);
+    // set distances
+    point1 = vec4(point1.xyz, distance_to_point(pos, vec3(point1.xyz)));
+    point2 = vec4(point2.xyz, distance_to_point(pos, vec3(point2.xyz)));
+    point3 = vec4(point2.xyz, distance_to_point(pos, vec3(point3.xyz)));
+    
+    // checking wh   eter to swap point1 and point2
+    if (point1.w > point2.w) {
+        swap_vec4(point1, point2);
+    }
+    if (point2.w > point3.w) {
+        swap_vec4(point2, point3);
+    }
+    if (point1.w > point2.w) {
+        swap_vec4(point1, point2);
+    }
+
+    for(int i = 3; i < imageSize(PointsTexture).x; i++) { 
+        vec4 point_checking = vec4(get_point_number(i).xyz, 0.0);
+        point_checking = vec4(point_checking.xyz, distance_to_point(pos, vec3(point_checking.xyz)));
+        // if point_checking is closer than point2
+        if (point_checking.w < point3.w) {
+            // if point_checking is closer than first two points
+            // replace point2 with point1 and make point_checking, point1
+            if (point_checking.w < point2.w) {
+                // closer than all points
+                if (point_checking.w < point1.w) {
+                    point3 = point2;
+                    point2 = point1;
+                    point1 = point_checking;
+                // closer the farthest two points but not the closest one
+                } else {
+                    point3 = point2;
+                    point2 = point_checking;
+                }
+            // if point_checking is closer than point3 but smaller than point2
+            // make point_checking, point2 
+            } else {
+                point3 = point_checking;
+            }
+        }
+    }
+}
+
 void main() {
     // `gl_GlobalInvocationID` gives the unique ID of the current thread (pixel)
     ivec2 global_id = ivec2(gl_GlobalInvocationID.xy);
@@ -96,36 +145,34 @@ void main() {
     for(int i = 0; i < imageSize(PointsTexture).x; i++) {
         vec3 point = get_point_number(i).xyz;
         if (length(vec2(coords).xy-vec2(point).xy) < 0.01) {
-            float current_point_dist = 2.0*abs(coords.z - point.z);
-            if (current_point_dist > 1) {
-                current_point_dist = 1-current_point_dist;
-            }
+            float current_point_dist = 1-abs(abs(coords.z - point.z)-0.5)*2;
             dist_point = min(dist_point, current_point_dist);
         }
     }
 
-    // Read the value from the input image
-    // float pixel_value = imageLoad(InputImage, global_id).r;
-
     vec4 point1 = vec4(0.0, 0.0, 0.0, 0.0);
     vec4 point2 = vec4(0.0, 0.0, 0.0, 0.0);
-    get_two_nearsest_points(coords, point1, point2);
+    vec4 point3 = vec4(0.0, 0.0, 0.0, 0.0);
+    get_three_nearsest_points(coords, point1, point2, point3);
     
-    // vec3 point_checking = vec3(0.41, 0.41, 0.0);
+    // vec3 point_checking = vec3(0.01, 0.01, 0.0);
     // vec4 point1_checking = vec4(0.0, 0.0, 0.0, 0.0);
     // vec4 point2_checking = vec4(0.0, 0.0, 0.0, 0.0);
-    // get_two_nearsest_points(point_checking, point1_checking, point2_checking);
+    // vec4 point3_checking = vec4(0.0, 0.0, 0.0, 0.0);
+    // get_three_nearsest_points(point_checking, point1_checking, point2_checking, point3_checking);
     
     // Write the result to the output image
     if (abs(point1.w-point2.w)<0.004) {
         imageStore(OutputImage, global_id, vec4(0.0, 0.0, 0.0, 1.0));
+    // } else if (abs(point1.w-point2.w)<0.02 && abs(point1.w-point3.w)<0.02) {
+    //     imageStore(OutputImage, global_id, vec4(0.0, 0.0, 1.0, 1.0));
     } else if (dist_point != 1) {
         imageStore(OutputImage, global_id, vec4(1.0, dist_point, dist_point, 1.0));
     // } else if (length(point_checking-coords) < 0.01) {
     //     imageStore(OutputImage, global_id, vec4(0.0, 1.0, 0.0, 1.0));
     } else {
-        imageStore(OutputImage, global_id, vec4(1.0, 1.0, 1.0, 1.0));
-        // imageStore(OutputImage, global_id, vec4(0.75, 0.125, 1.0, 1.0));
+        imageStore(OutputImage, global_id, vec4(1.0, 1.0, 1.0, 0.0));
+        // imageStore(OutputImage, global_id, vec4(0.0353, 0.0196, 0.0392, 1.0));
         // imageStore(OutputImage, global_id, vec4(length(point1-coords)-length(point2-coords), length(point1-coords), length(point2-coords), 1.0));
         // imageStore(OutputImage, global_id, nearest_points);
     }
