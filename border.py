@@ -20,26 +20,34 @@ with open('border_shader.glsl', 'r') as file:
     compute_shader_source = file.read()
 
 
-point_number = 32
-width, height = 512, 512
+point_number = 8
+width, height = 256, 256
 frames_per_second = 30
 total_seconds = 5
 
-total_frames = frames_per_second*total_seconds
+total_frames = 1
+# total_frames = frames_per_second*total_seconds
 
 # seed = 0
 # farthest_dist = 0
-# for i in range(100):
+# for i in range(1000):
 #     rng = numpy.random.default_rng(i)
-#     points_data = rng.random((1, point_number, 3))
+#     points_data = rng.random((1, point_number, 2))
 #     dist = get_clostest_dist(points_data[0])
 #     if dist > farthest_dist:
 #         farthest_dist = dist
 #         seed = i
 
-rng = numpy.random.default_rng(90)
-points_data = rng.random((1, point_number, 3))
-points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 1))), axis=2)
+if total_frames > 1:
+    rng = numpy.random.default_rng(90)
+    points_data = rng.random((1, point_number, 3))
+    points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 1))), axis=2)
+else:
+    rng = numpy.random.default_rng(87) # for 8 points
+    # rng = numpy.random.default_rng(679) # for 32 points
+    points_data = rng.random((1, point_number, 2))
+    points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 2))), axis=2)
+
 # points_data = numpy.array([[
 #     [0.5, 0.8, 0.4, 0.0],
 #     [0.6, 0.3, 0.8, 0.0],
@@ -99,7 +107,7 @@ for i in range(total_frames):
 
     # 7. Read the output texture data back to a numpy array
     output_data = numpy.frombuffer(output_texture.read(), dtype='f4').reshape(height, width, 4)
-    print(output_data[8][0])
+    print(output_data[0][0])
     print()
     output_data = numpy.delete(output_data, 3, axis=2)
     output_data = numpy.flip(output_data, axis=0)
@@ -118,7 +126,10 @@ for i in range(total_frames):
     frames.append(image)
 
 # save image
-frames[0].save("border.gif", save_all=True, append_images=frames[1:], optimize=False, duration=1000/frames_per_second,loop=0)
+if total_frames > 1:
+    frames[0].save("border.gif", save_all=True, append_images=frames[1:], optimize=False, duration=1000/frames_per_second,loop=0)
+else:
+    frames[0].save("border.png")
  
 # Optional: Release resources
 context.release()
