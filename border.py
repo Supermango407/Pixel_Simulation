@@ -20,7 +20,7 @@ with open('border_shader.glsl', 'r') as file:
     compute_shader_source = file.read()
 
 
-point_number = 8
+point_number = 32
 width, height = 256, 256
 frames_per_second = 30
 total_seconds = 5
@@ -43,10 +43,15 @@ if total_frames > 1:
     points_data = rng.random((1, point_number, 3))
     points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 1))), axis=2)
 else:
-    rng = numpy.random.default_rng(87) # for 8 points
-    # rng = numpy.random.default_rng(679) # for 32 points
+    # rng = numpy.random.default_rng(87) # for 8 points
+    # rng = numpy.random.default_rng(372) # for 16 points
+    rng = numpy.random.default_rng(679) # for 32 points
     points_data = rng.random((1, point_number, 2))
     points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 2))), axis=2)
+
+# with open('border_pygame.py', 'w') as file:
+#     for point in points_data[0].tolist():
+#         print(point[:2], file=file)
 
 # points_data = numpy.array([[
 #     [0.5, 0.8, 0.4, 0.0],
