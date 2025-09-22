@@ -11,6 +11,7 @@ layout (binding = 1, rgba32f) readonly uniform image2D PointsTexture;
 uniform float time;
 uniform uint width;
 uniform uint height;
+uniform uint thickness;
 
 void swap_vec4(inout vec4 a, inout vec4 b) {
     vec4 temp = a;
@@ -22,7 +23,7 @@ vec3 get_point_number(int i) {
     return vec3(imageLoad(PointsTexture, ivec2(i, 0)).xyz);
 }
 
-float distance_to_point(vec3 coords, vec3 point) {
+vec3 get_point_after_flip(vec3 coords, vec3 point) {
     // point too far left
     if (coords.x-point.x > 0.5) {
         point.x += 1;
@@ -49,8 +50,11 @@ float distance_to_point(vec3 coords, vec3 point) {
     else if (coords.z-point.z < -0.5) {
         point.z -= 1;
     }
+    return point;
+}
 
-    return length(coords.xyz-point.xyz);
+float distance_to_point(vec3 coords, vec3 point) {
+    return length(coords.xyz-get_point_after_flip(coords, point));
 }
 
 // first two values for point1 next two for point2
@@ -96,9 +100,9 @@ void get_three_nearsest_points(vec3 pos, inout vec4 point1, inout vec4 point2, i
     // set distances
     point1 = vec4(point1.xyz, distance_to_point(pos, vec3(point1.xyz)));
     point2 = vec4(point2.xyz, distance_to_point(pos, vec3(point2.xyz)));
-    point3 = vec4(point2.xyz, distance_to_point(pos, vec3(point3.xyz)));
+    point3 = vec4(point3.xyz, distance_to_point(pos, vec3(point3.xyz)));
     
-    // checking wh   eter to swap point1 and point2
+    // checking wheter to swap point1 and point2
     if (point1.w > point2.w) {
         swap_vec4(point1, point2);
     }
@@ -112,7 +116,7 @@ void get_three_nearsest_points(vec3 pos, inout vec4 point1, inout vec4 point2, i
     for(int i = 3; i < imageSize(PointsTexture).x; i++) { 
         vec4 point_checking = vec4(get_point_number(i).xyz, 0.0);
         point_checking = vec4(point_checking.xyz, distance_to_point(pos, vec3(point_checking.xyz)));
-        // if point_checking is closer than point2
+        // if point_checking is closer than point3
         if (point_checking.w < point3.w) {
             // if point_checking is closer than first two points
             // replace point2 with point1 and make point_checking, point1
@@ -136,6 +140,34 @@ void get_three_nearsest_points(vec3 pos, inout vec4 point1, inout vec4 point2, i
     }
 }
 
+void get_side_points(vec3 coords, vec3 point1, vec3 point2, inout vec3 side_point1, inout vec3 side_point2) {
+    vec3 side_vec = normalize(get_point_after_flip(coords, point1)-get_point_after_flip(coords, point2))/width * thickness;
+    // vec2 mid_point = (point1+point2)/2;
+    
+    // vec2 side_point1 = mid_point.xy + side_vec;
+    // vec2 side_point2 = mid_point.xy - side_vec;
+    
+    side_point1 = side_vec+coords;
+    side_point2 = -side_vec+coords;
+}
+
+bool is_border(vec3 coords) {
+    vec4 point1 = vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 point2 = vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 point3 = vec4(0.0, 0.0, 0.0, 0.0);
+    get_three_nearsest_points(coords, point1, point2, point3);
+
+    vec3 side_point1 = vec3(0.0, 0.0, 0.0);
+    vec3 side_point2 = vec3(0.0, 0.0, 0.0);
+    get_side_points(coords, point1.xyz, point2.xyz, side_point1, side_point2);
+    
+    float diff = abs(distance_to_point(coords, point1.xyz)-distance_to_point(coords, point2.xyz));
+    float side1_diff = abs(distance_to_point(side_point1, point1.xyz)-distance_to_point(side_point1, point2.xyz));
+    float side2_diff = abs(distance_to_point(side_point2, point1.xyz)-distance_to_point(side_point2, point2.xyz));
+
+    return diff<side1_diff && diff<side2_diff;
+}
+
 void main() {
     // `gl_GlobalInvocationID` gives the unique ID of the current thread (pixel)
     ivec2 global_id = ivec2(gl_GlobalInvocationID.xy);
@@ -150,28 +182,30 @@ void main() {
         }
     }
 
-    vec4 point1 = vec4(0.0, 0.0, 0.0, 0.0);
-    vec4 point2 = vec4(0.0, 0.0, 0.0, 0.0);
-    vec4 point3 = vec4(0.0, 0.0, 0.0, 0.0);
-    get_three_nearsest_points(coords, point1, point2, point3);
-    
-    // vec3 point_checking = vec3(0.01, 0.01, 0.0);
+    // vec3 point_checking = vec3(0.11, 0.61, 0.0);
     // vec4 point1_checking = vec4(0.0, 0.0, 0.0, 0.0);
     // vec4 point2_checking = vec4(0.0, 0.0, 0.0, 0.0);
     // vec4 point3_checking = vec4(0.0, 0.0, 0.0, 0.0);
     // get_three_nearsest_points(point_checking, point1_checking, point2_checking, point3_checking);
     
+    // vec3 side_point1 = vec3(0.0, 0.0, 0.0);
+    // vec3 side_point2 = vec3(0.0, 0.0, 0.0);
+    // get_side_points(point_checking, point1_checking.xyz, point2_checking.xyz, side_point1, side_point2);
+
     // Write the result to the output image
-    if (abs(point1.w-point2.w)<0.004) {
+    if (is_border(coords)) {
         imageStore(OutputImage, global_id, vec4(0.0, 0.0, 0.0, 1.0));
     // } else if (abs(point1.w-point2.w)<0.02 && abs(point1.w-point3.w)<0.02) {
     //     imageStore(OutputImage, global_id, vec4(0.0, 0.0, 1.0, 1.0));
     } else if (dist_point != 1) {
         imageStore(OutputImage, global_id, vec4(1.0, dist_point, dist_point, 1.0));
-    // } else if (length(point_checking-coords) < 0.01) {
+    // } else if (length(point_checking.xy-coords.xy) < 0.01) {
     //     imageStore(OutputImage, global_id, vec4(0.0, 1.0, 0.0, 1.0));
+    // } else if (length(side_point1-coords) < 0.01 || length(side_point2-coords) < 0.01){
+    //     imageStore(OutputImage, global_id, vec4(0.0, 1.0, 1.0, 1.0));
     } else {
         imageStore(OutputImage, global_id, vec4(1.0, 1.0, 1.0, 0.0));
+        // imageStore(OutputImage, global_id, vec4(side_point2.xy, 1.0, 0.0));
         // imageStore(OutputImage, global_id, vec4(0.0353, 0.0196, 0.0392, 1.0));
         // imageStore(OutputImage, global_id, vec4(length(point1-coords)-length(point2-coords), length(point1-coords), length(point2-coords), 1.0));
         // imageStore(OutputImage, global_id, nearest_points);

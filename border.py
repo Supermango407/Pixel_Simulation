@@ -21,12 +21,13 @@ with open('border_shader.glsl', 'r') as file:
 
 
 point_number = 32
-width, height = 256, 256
+width, height = 1024, 1024
+thickness = 2
 frames_per_second = 30
 total_seconds = 5
 
-total_frames = 1
-# total_frames = frames_per_second*total_seconds
+# total_frames = 1
+total_frames = frames_per_second*total_seconds
 
 # seed = 0
 # farthest_dist = 0
@@ -39,19 +40,31 @@ total_frames = 1
 #         seed = i
 
 if total_frames > 1:
-    rng = numpy.random.default_rng(90)
+    rng = numpy.random.default_rng(91)
     points_data = rng.random((1, point_number, 3))
     points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 1))), axis=2)
 else:
     # rng = numpy.random.default_rng(87) # for 8 points
     # rng = numpy.random.default_rng(372) # for 16 points
     rng = numpy.random.default_rng(679) # for 32 points
+    # rng = numpy.random.default_rng(0)
     points_data = rng.random((1, point_number, 2))
     points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 2))), axis=2)
 
 # with open('border_pygame.py', 'w') as file:
 #     for point in points_data[0].tolist():
 #         print(point[:2], file=file)
+
+# points_data = numpy.array([[
+#     [0.5, 0.8, 0.0, 0.0],
+#     [0.6, 0.3, 0.0, 0.0],
+#     [0.2, 0.9, 0.0, 0.0],
+#     [0.4, 0.2, 0.0, 0.0],
+#     [0.1, 0.4, 0.0, 0.0],
+#     [0.9, 0.1, 0.0, 0.0],
+#     [0.8, 0.8, 0.0, 0.0],
+#     [0.4, 0.5, 0.0, 0.0]
+# ]], dtype='f4') # 'f4' is for 32-bit float
 
 # points_data = numpy.array([[
 #     [0.5, 0.8, 0.4, 0.0],
@@ -91,6 +104,7 @@ output_texture = context.texture(
 compute_shader = context.compute_shader(compute_shader_source)
 compute_shader['width'] = width
 compute_shader['height'] = height
+compute_shader['thickness'] = thickness
 
 # Bind the textures to their respective image units
 # Output image is write-only (read=False, write=True)
