@@ -16,6 +16,7 @@ uniform uint thickness = 2;
 uniform vec3 background_color = vec3(1, 1, 1);
 uniform vec3 border_color = vec3(0, 0, 0);
 uniform vec3 dot_color = vec3(1, 0, 0);
+uniform bool multi_colored = false;
 
 void swap_vec4(inout vec4 a, inout vec4 b) {
     vec4 temp = a;
@@ -155,12 +156,7 @@ void get_side_points(vec3 coords, vec3 point1, vec3 point2, inout vec3 side_poin
     side_point2 = -side_vec+coords;
 }
 
-bool is_border(vec3 coords) {
-    vec4 point1 = vec4(0.0, 0.0, 0.0, 0.0);
-    vec4 point2 = vec4(0.0, 0.0, 0.0, 0.0);
-    vec4 point3 = vec4(0.0, 0.0, 0.0, 0.0);
-    get_three_nearsest_points(coords, point1, point2, point3);
-
+bool is_border(vec3 coords, vec4 point1, vec4 point2, vec4 point3) {
     vec3 side_point1 = vec3(0.0, 0.0, 0.0);
     vec3 side_point2 = vec3(0.0, 0.0, 0.0);
     get_side_points(coords, point1.xyz, point2.xyz, side_point1, side_point2);
@@ -192,12 +188,13 @@ void main() {
     // vec4 point3_checking = vec4(0.0, 0.0, 0.0, 0.0);
     // get_three_nearsest_points(point_checking, point1_checking, point2_checking, point3_checking);
     
-    // vec3 side_point1 = vec3(0.0, 0.0, 0.0);
-    // vec3 side_point2 = vec3(0.0, 0.0, 0.0);
-    // get_side_points(point_checking, point1_checking.xyz, point2_checking.xyz, side_point1, side_point2);
+    vec4 point1 = vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 point2 = vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 point3 = vec4(0.0, 0.0, 0.0, 0.0);
+    get_three_nearsest_points(coords, point1, point2, point3);
 
     // Write the result to the output image
-    if (is_border(coords)) {
+    if (is_border(coords, point1, point2, point3)) {
         imageStore(OutputImage, global_id, vec4(border_color.xyz, 1.0));
     // } else if (abs(point1.w-point2.w)<0.02 && abs(point1.w-point3.w)<0.02) {
     //     imageStore(OutputImage, global_id, vec4(0.0, 0.0, 1.0, 1.0));
@@ -208,10 +205,15 @@ void main() {
     // } else if (length(side_point1-coords) < 0.01 || length(side_point2-coords) < 0.01){
     //     imageStore(OutputImage, global_id, vec4(0.0, 1.0, 1.0, 1.0));
     } else {
-        imageStore(OutputImage, global_id, vec4(background_color.xyz, 1.0));
-        // imageStore(OutputImage, global_id, vec4(side_point2.xy, 1.0, 0.0));
-        // imageStore(OutputImage, global_id, vec4(0.0353, 0.0196, 0.0392, 1.0));
+        if (multi_colored){
+            imageStore(OutputImage, global_id, vec4(point1.xyz, 1.0));
+        } else {
+            imageStore(OutputImage, global_id, vec4(background_color.xyz, 1.0));
+        
+            // imageStore(OutputImage, global_id, vec4(side_point2.xy, 1.0, 0.0));
+            // imageStore(OutputImage, global_id, vec4(0.0353, 0.0196, 0.0392, 1.0));
         // imageStore(OutputImage, global_id, vec4(length(point1-coords)-length(point2-coords), length(point1-coords), length(point2-coords), 1.0));
         // imageStore(OutputImage, global_id, nearest_points);
+        }
     }
 }

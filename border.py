@@ -23,12 +23,13 @@ with open('border_shader.glsl', 'r') as file:
 draw_dots = False
 point_number = 32
 width, height = 1024, 1024
-thickness = 8
+thickness = 4
 frames_per_second = 30
 total_seconds = 10
-background_color = (0.5, 0, 0.5)
-border_color = (0, 1, 1)
+background_color = (1, 1, 1)
+border_color = (0, 0, 0)
 dot_color = (1, 0, 0)
+multi_colored = True
 
 total_frames = 1
 # total_frames = frames_per_second*total_seconds
@@ -47,14 +48,14 @@ if total_frames > 1:
     # rng = numpy.random.default_rng(91)
     rng = numpy.random.default_rng(1)
     points_data = rng.random((1, point_number, 3))
-    points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 1))), axis=2)
+    points_data = numpy.concatenate((points_data, numpy.ones((1, point_number, 1))), axis=2)
 else:
     # rng = numpy.random.default_rng(87) # for 8 points
     # rng = numpy.random.default_rng(372) # for 16 points
     rng = numpy.random.default_rng(679) # for 32 points
     # rng = numpy.random.default_rng(0)
     points_data = rng.random((1, point_number, 2))
-    points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 2))), axis=2)
+    points_data = numpy.concatenate((points_data, numpy.ones((1, point_number, 2))), axis=2)
 
 # with open('border_pygame.py', 'w') as file:
 #     for point in points_data[0].tolist():
@@ -114,6 +115,7 @@ compute_shader['thickness'] = thickness
 compute_shader['background_color'] = background_color
 compute_shader['border_color'] = border_color
 compute_shader['dot_color'] = dot_color
+compute_shader['multi_colored'] = multi_colored
 
 # Bind the textures to their respective image units
 # Output image is write-only (read=False, write=True)
