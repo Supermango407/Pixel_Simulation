@@ -28,6 +28,7 @@ frames_per_second = 30
 total_seconds = 10
 background_color = (0.5, 0, 0.5)
 border_color = (0, 1, 1)
+dot_color = (1, 0, 0)
 
 total_frames = 1
 # total_frames = frames_per_second*total_seconds
@@ -112,6 +113,7 @@ compute_shader['height'] = height
 compute_shader['thickness'] = thickness
 compute_shader['background_color'] = background_color
 compute_shader['border_color'] = border_color
+compute_shader['dot_color'] = dot_color
 
 # Bind the textures to their respective image units
 # Output image is write-only (read=False, write=True)

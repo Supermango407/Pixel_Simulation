@@ -15,6 +15,7 @@ uniform uint height = 256;
 uniform uint thickness = 2;
 uniform vec3 background_color = vec3(1, 1, 1);
 uniform vec3 border_color = vec3(0, 0, 0);
+uniform vec3 dot_color = vec3(1, 0, 0);
 
 void swap_vec4(inout vec4 a, inout vec4 b) {
     vec4 temp = a;
@@ -201,7 +202,7 @@ void main() {
     // } else if (abs(point1.w-point2.w)<0.02 && abs(point1.w-point3.w)<0.02) {
     //     imageStore(OutputImage, global_id, vec4(0.0, 0.0, 1.0, 1.0));
     } else if (draw_dots && dist_point != 1) {
-        imageStore(OutputImage, global_id, vec4(1.0, dist_point, dist_point, 1.0));
+        imageStore(OutputImage, global_id, vec4(mix(dot_color, background_color, dist_point), 1.0));
     // } else if (length(point_checking.xy-coords.xy) < 0.01) {
     //     imageStore(OutputImage, global_id, vec4(0.0, 1.0, 0.0, 1.0));
     // } else if (length(side_point1-coords) < 0.01 || length(side_point2-coords) < 0.01){
