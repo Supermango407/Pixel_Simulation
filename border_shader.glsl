@@ -8,10 +8,13 @@ layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 layout (binding = 0, rgba32f) writeonly uniform image2D OutputImage;
 layout (binding = 1, rgba32f) readonly uniform image2D PointsTexture;
 
-uniform float time;
-uniform uint width;
-uniform uint height;
-uniform uint thickness;
+uniform float time = 1;
+uniform bool draw_dots = false;
+uniform uint width = 256;
+uniform uint height = 256;
+uniform uint thickness = 2;
+uniform vec3 background_color = vec3(1, 1, 1);
+uniform vec3 border_color = vec3(0, 0, 0);
 
 void swap_vec4(inout vec4 a, inout vec4 b) {
     vec4 temp = a;
@@ -194,17 +197,17 @@ void main() {
 
     // Write the result to the output image
     if (is_border(coords)) {
-        imageStore(OutputImage, global_id, vec4(0.0, 0.0, 0.0, 1.0));
+        imageStore(OutputImage, global_id, vec4(border_color.xyz, 1.0));
     // } else if (abs(point1.w-point2.w)<0.02 && abs(point1.w-point3.w)<0.02) {
     //     imageStore(OutputImage, global_id, vec4(0.0, 0.0, 1.0, 1.0));
-    } else if (dist_point != 1) {
+    } else if (draw_dots && dist_point != 1) {
         imageStore(OutputImage, global_id, vec4(1.0, dist_point, dist_point, 1.0));
     // } else if (length(point_checking.xy-coords.xy) < 0.01) {
     //     imageStore(OutputImage, global_id, vec4(0.0, 1.0, 0.0, 1.0));
     // } else if (length(side_point1-coords) < 0.01 || length(side_point2-coords) < 0.01){
     //     imageStore(OutputImage, global_id, vec4(0.0, 1.0, 1.0, 1.0));
     } else {
-        imageStore(OutputImage, global_id, vec4(1.0, 1.0, 1.0, 0.0));
+        imageStore(OutputImage, global_id, vec4(background_color.xyz, 1.0));
         // imageStore(OutputImage, global_id, vec4(side_point2.xy, 1.0, 0.0));
         // imageStore(OutputImage, global_id, vec4(0.0353, 0.0196, 0.0392, 1.0));
         // imageStore(OutputImage, global_id, vec4(length(point1-coords)-length(point2-coords), length(point1-coords), length(point2-coords), 1.0));

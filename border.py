@@ -20,14 +20,17 @@ with open('border_shader.glsl', 'r') as file:
     compute_shader_source = file.read()
 
 
+draw_dots = False
 point_number = 32
 width, height = 1024, 1024
-thickness = 2
+thickness = 8
 frames_per_second = 30
-total_seconds = 5
+total_seconds = 10
+background_color = (0.5, 0, 0.5)
+border_color = (0, 1, 1)
 
-# total_frames = 1
-total_frames = frames_per_second*total_seconds
+total_frames = 1
+# total_frames = frames_per_second*total_seconds
 
 # seed = 0
 # farthest_dist = 0
@@ -40,7 +43,8 @@ total_frames = frames_per_second*total_seconds
 #         seed = i
 
 if total_frames > 1:
-    rng = numpy.random.default_rng(91)
+    # rng = numpy.random.default_rng(91)
+    rng = numpy.random.default_rng(1)
     points_data = rng.random((1, point_number, 3))
     points_data = numpy.concatenate((points_data, numpy.zeros((1, point_number, 1))), axis=2)
 else:
@@ -102,9 +106,12 @@ output_texture = context.texture(
 
 # 5. Create a ComputeShader object and bind textures
 compute_shader = context.compute_shader(compute_shader_source)
+compute_shader['draw_dots'] = draw_dots
 compute_shader['width'] = width
 compute_shader['height'] = height
 compute_shader['thickness'] = thickness
+compute_shader['background_color'] = background_color
+compute_shader['border_color'] = border_color
 
 # Bind the textures to their respective image units
 # Output image is write-only (read=False, write=True)
