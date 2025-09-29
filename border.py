@@ -22,8 +22,8 @@ with open('border_shader.glsl', 'r') as file:
 
 draw_dots = False
 point_number = 32
-width, height = 1024, 1024
-thickness = 4
+width, height = 512, 512
+thickness = 2
 frames_per_second = 30
 total_seconds = 10
 background_color = (1, 1, 1)
@@ -31,8 +31,8 @@ border_color = (0, 0, 0)
 dot_color = (1, 0, 0)
 multi_colored = True
 
-total_frames = 1
-# total_frames = frames_per_second*total_seconds
+# total_frames = 1
+total_frames = frames_per_second*total_seconds
 
 # seed = 0
 # farthest_dist = 0
