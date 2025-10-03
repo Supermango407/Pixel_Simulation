@@ -3,6 +3,7 @@ import numpy
 from PIL import Image
 import math
 
+
 def get_clostest_dist(points:numpy.array) -> float:
     nearest = math.inf
     for i, point1 in enumerate(points):
@@ -13,6 +14,7 @@ def get_clostest_dist(points:numpy.array) -> float:
             if dist < nearest:
                 nearest = dist
     return nearest
+
 
 # get compute shader code
 compute_shader_source = ""
