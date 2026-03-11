@@ -10,18 +10,18 @@ size = width*height
 
 # get compute shader code
 compute_shader_source = ""
-with open('compute_shader_main.glsl', 'r') as file:
+with open('Example/compute_shader_main_multiple_buffers.glsl', 'r') as file:
     compute_shader_source = file.read()
 
 # create content
 context = moderngl.create_standalone_context()
 
-# create ouput buffers with size times four since float take up 4 bytes
+# create output buffers with size times four since float take up 4 bytes
 output_buffer_r = context.buffer(reserve=size*4)
 output_buffer_g = context.buffer(reserve=size*4)
 output_buffer_b = context.buffer(reserve=size*4)
 
-# bind buffers to glsl buffer indecies
+# bind buffers to glsl buffer indices
 output_buffer_r.bind_to_storage_buffer(0)
 output_buffer_g.bind_to_storage_buffer(1)
 output_buffer_b.bind_to_storage_buffer(2)
@@ -49,7 +49,9 @@ rgb_image_array = numpy.stack((result_data_r, result_data_g, result_data_b), axi
 rgb_image_array = rgb_image_array.astype(numpy.uint8)
 
 # create image
-image = Image.fromarray(rgb_image_array, "RGB")
+img = Image.fromarray(rgb_image_array, "RGB")
+
 # save image
-image.save("compute_shader_main_output.png")
+# img.save("compute_shader_main_output.png")
+img.show()
  

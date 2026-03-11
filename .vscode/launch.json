@@ -8,7 +8,7 @@
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/border_pygame.py",
+            "program": "${workspaceFolder}/line_extend/line_extend.py",
             "console": "integratedTerminal"
         }
     ]

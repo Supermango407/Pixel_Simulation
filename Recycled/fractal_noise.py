@@ -1,6 +1,6 @@
 import random
 import math
-from main import ImageRenderer
+from Pygame.main import ImageRenderer
 # import pixel_help
 # from pixel_help import border
 
@@ -64,11 +64,11 @@ def points_in_adjacent_cells_2D(cell_list, x, y):
     for i in range(-1, 2):
         for j in range(-1, 2):
             cell_in = (x+i), (y+j)
-            cells_orgin = cell_in[0]*cell_size[0], cell_in[1]*cell_size[1]
+            cells_origin = cell_in[0]*cell_size[0], cell_in[1]*cell_size[1]
             point_in_cell = cell_list[cell_in[0]%width][cell_in[1]%height]
 
             for point in point_in_cell:
-                cells.append((cells_orgin[0]+point[0], cells_orgin[1]+point[1]))
+                cells.append((cells_origin[0]+point[0], cells_origin[1]+point[1]))
     
     return cells
 
@@ -83,11 +83,11 @@ def points_in_adjacent_cells_3D(cell_list, x, y, z):
         for j in range(-1, 2):
             for k in range(-1, 2):
                 cell_in = (x+i), (y+j), (z+k)
-                cells_orgin = cell_in[0]*cell_size[0], cell_in[1]*cell_size[1], cell_in[2]*cell_size[2]
+                cells_origin = cell_in[0]*cell_size[0], cell_in[1]*cell_size[1], cell_in[2]*cell_size[2]
                 point_in_cell = cell_list[cell_in[0]%width][cell_in[1]%height][cell_in[2]%depth]
 
                 for point in point_in_cell:
-                    cells.append((cells_orgin[0]+point[0], cells_orgin[1]+point[1], cells_orgin[2]+point[2]))
+                    cells.append((cells_origin[0]+point[0], cells_origin[1]+point[1], cells_origin[2]+point[2]))
     
     return cells
 
@@ -226,8 +226,8 @@ if __name__ == '__main__':
     
     renderer = ImageRenderer(window_size[0], window_size[1], border_3D, window_size[2], 16)
     renderer.generate()
-    renderer.save_images('border_3D_3', 'gif_outputs/')
-    # renderer.images[0].show()
+    # renderer.save_images('border_3D_3', 'gif_outputs/')
+    renderer.images[0].show()
 
     # for i in range(cell_count[0]):
     #     plane = []
